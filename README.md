@@ -1,12 +1,12 @@
 # command-transcription
-A tool to quickly transcribe multiple MP4 files then clean with chatGPT
+A tool to quickly transcribe multiple audio files and clean them with ChatGPT.
 
 
 ## Installation
 
 Create a virtual environment and activate it:
 ```bash
-$ python3 -m venv env
+$ python -m venv env
 $ source env/bin/activate
 ```
 
@@ -31,4 +31,16 @@ choco install ffmpeg
 
 # on Windows using Scoop (https://scoop.sh/)
 scoop install ffmpeg
+```
+
+## Usage
+
+Run the transcription script with Python. Use the `-h` flag to see the available options.
+```bash
+$ python transcribe.py <options>
+```
+
+Run the cleaning script with Python. The default input folder is `transcriptions`.
+```bash
+$ python clean.py
 ```
