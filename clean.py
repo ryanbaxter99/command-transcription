@@ -4,4 +4,78 @@ Using OpenAI's GPT library, this module reads the generated
 transcription files and cleans them up.
 """
 
+import argparse
+import os
+import sys
+from pathlib import Path
+
 import openai
+
+TRANSFOLDER = "transcriptions"
+CLEANFOLDER = "cleaned_transcriptions"
+
+openai.api_key = "api_key"
+
+def handle_io(args: argparse.Namespace) -> tuple[Path, Path]:
+    """Process and validate the input/output folders."""
+    trans_folder: Path = Path(args.trans_folder).resolve()
+    clean_folder: Path = Path(args.clean_folder).resolve()
+
+    # checks to make sure input folder exists
+    if not os.path.exists(trans_folder):
+        print(f'Transcription folder {trans_folder} does not exist.', file=sys.stderr)
+        sys.exit(1)
+
+    # checks to make sure output folder exists
+    if not os.path.exists(clean_folder):
+        print(
+            f'Cleaned transcription folder {clean_folder.name} does not exist, creating it.')
+        os.makedirs(clean_folder)
+
+    return trans_folder, clean_folder
+
+def clean_text(file: Path, index: int) -> str:
+    """Load the text from file and clean the grammar using ChatGPT."""
+    with open(file, 'r', encoding='utf-8') as file:
+        text = file.read()
+
+    # pre-prompt for chatGPT (needs work to edit what we want)
+    prompt = f"Please correct the grammar of the following text: {text}"
+    
+    # might need to look into 'max_tokens'
+    response = openai.Completion.create(engine="text-davinci-002", prompt=prompt, max_tokens=1024)
+
+    cleaned_text = response.choices[0].text.strip()
+
+    return cleaned_text
+
+def write_cleaned_text(clean_folder: Path, cleaned_text: str, index: int) -> None:
+    """Write the cleaned text to a new file."""
+    
+    # prepare output files
+    out_file = clean_folder / f'cleaned_transcription{index}.txt'
+
+    print(f'*** Cleaning {out_file.name} ***')
+    
+    # write out the transcription to a text file
+    with open(out_file, 'w', encoding='utf-8') as file:
+        file.write(cleaned_text)
+
+def main() -> None:
+    argparser = argparse.ArgumentParser(description='Clean transcriptions using ChatGPT.')
+    argparser.add_argument('trans_folder', nargs='?', help='Transcription folder', default=TRANSFOLDER)
+    argparser.add_argument('clean_folder', nargs='?', help='Cleaned transcription folder', default=CLEANFOLDER)
+    args = argparser.parse_args()
+
+    # create OS paths for the input/output folders
+    trans_folder, clean_folder = handle_io(args)
+
+    # for each file, transcribe it and write it out to a text file
+    for i, file in enumerate(trans_folder.iterdir(), start=1):
+        cleaned_text = clean_text(file.resolve(), i)
+        write_cleaned_text(clean_folder, cleaned_text, i)
+        print(f'Cleaned {file.name} and saved to {clean_folder}/cleaned_transcription{i}.txt')
+
+if __name__ == '__main__':
+    main()
+

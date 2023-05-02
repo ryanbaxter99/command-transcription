@@ -31,6 +31,8 @@ def handle_io(args: argparse.Namespace) -> tuple[Path, Path]:
         print(
             f'Output folder {output_folder.name} does not exist, creating it.')
         os.makedirs(output_folder)
+    
+   
 
     return input_folder, output_folder
 
