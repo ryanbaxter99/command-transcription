@@ -44,7 +44,9 @@ def clean_text(file: Path, index: int) -> str:
     
     # might need to look into 'max_tokens'
     response = openai.Completion.create(engine="text-davinci-002", prompt=prompt, max_tokens=1024)
-
+    
+    # extracts the cleaned text from the first choice in the response, 
+    # removes any leading or trailing whitespaces, and assigns the result to the variable
     cleaned_text = response.choices[0].text.strip()
 
     return cleaned_text

@@ -33,7 +33,6 @@ def handle_io(args: argparse.Namespace) -> tuple[Path, Path]:
         os.makedirs(output_folder)
     
    
-
     return input_folder, output_folder
 
 
